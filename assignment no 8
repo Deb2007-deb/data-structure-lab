@@ -1,0 +1,119 @@
+
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int id, qty;
+    float price;
+    string name;
+    Node *next, *hnext;
+};
+
+Node *head = NULL, *ht[10] = {};
+
+Node* search(int id) {
+    Node *t = ht[id % 10];
+    while (t) {
+        if (t->id == id) return t;
+        t = t->hnext;
+    }
+    return NULL;
+}
+
+void add() {
+    Node *n = new Node;
+    cout << "Enter ID Name Price Quantity: ";
+    cin >> n->id >> n->name >> n->price >> n->qty;
+
+    if (search(n->id)) {
+        cout << "ID already exists!\n";
+        delete n;
+        return;
+    }
+
+    n->next = head;
+    head = n;
+
+    int i = n->id % 10;
+    n->hnext = ht[i];
+    ht[i] = n;
+
+    cout << "Product Added!\n";
+}
+
+void display() {
+    for (Node *t = head; t; t = t->next)
+        cout << t->id << " " << t->name << " "
+             << t->price << " " << t->qty << endl;
+}
+
+void update() {
+    int id;
+    cout << "Enter ID: ";
+    cin >> id;
+    Node *t = search(id);
+
+    if (!t) cout << "Not Found!\n";
+    else {
+        cout << "Enter Price and Quantity: ";
+        cin >> t->price >> t->qty;
+    }
+}
+
+void removeProduct() {
+    int id;
+    cout << "Enter ID: ";
+    cin >> id;
+
+    Node *t = head, *p = NULL;
+    while (t && t->id != id) {
+        p = t;
+        t = t->next;
+    }
+
+    if (!t) {
+        cout << "Not Found!\n";
+        return;
+    }
+
+    if (p) p->next = t->next;
+    else head = t->next;
+
+    int i = id % 10;
+    Node *h = ht[i], *q = NULL;
+
+    while (h != t) {
+        q = h;
+        h = h->hnext;
+    }
+
+    if (q) q->hnext = h->hnext;
+    else ht[i] = h->hnext;
+
+    delete t;
+    cout << "Deleted!\n";
+}
+
+int main() {
+    int ch, id;
+    do {
+        cout << "\n1.Add 2.Display 3.Search";
+        cout << "\n4.Update 5.Delete 6.Exit\n";
+        cin >> ch;
+
+        switch (ch) {
+            case 1: add(); break;
+            case 2: display(); break;
+            case 3:
+                cout << "Enter ID: ";
+                cin >> id;
+                if (search(id)) cout << "Product Found!\n";
+                else cout << "Not Found!\n";
+                break;
+            case 4: update(); break;
+            case 5: removeProduct(); break;
+        }
+    } while (ch != 6);
+
+    return 0;
+}
